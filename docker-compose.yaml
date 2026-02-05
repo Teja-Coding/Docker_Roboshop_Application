@@ -1,0 +1,102 @@
+services:
+  catalogue:
+    # Build image from ./catalogue/Dockerfile
+    build:
+      context: ./catalogue
+      dockerfile: Dockerfile
+    # Image name after build (your Docker Hub username)
+    image: tejahere/catalogue:v1
+    container_name: catalogue
+    depends_on:
+      - mongodb
+
+  mongodb:
+    # Build custom MongoDB image
+    build: ./mongodb
+    image: tejahere/mongodb:v1
+    container_name: mongodb
+    volumes:
+      # Persistent data for MongoDB
+      - mongodb:/data/db
+
+  redis:
+    # Using official Redis image from Docker Hub
+    image: redis:7.0
+    container_name: redis
+    volumes:
+      - redis:/data
+
+  mysql:
+    # Build MySQL image from Dockerfile
+    build: ./mysql
+    image: tejahere/mysql:v1
+    container_name: mysql
+    volumes:
+      - mysql:/var/lib/mysql
+
+  rabbitmq:
+    image: rabbitmq:3
+    container_name: rabbitmq
+    volumes:
+      - rabbitmq:/var/lib/rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: roboshop
+      RABBITMQ_DEFAULT_PASS: roboshop123
+
+  user:
+    build: ./user
+    image: tejahere/user:v1
+    container_name: user
+    depends_on:
+      - mongodb
+      - redis
+
+  cart:
+    build: ./cart
+    image: tejahere/cart:v1
+    container_name: cart
+    depends_on:
+      - redis
+      - catalogue
+
+  shipping:
+    build: ./shipping
+    image: tejahere/shipping:v1
+    container_name: shipping
+    depends_on:
+      - mysql
+      - cart
+
+  payment:
+    build: ./payment
+    image: tejahere/payment:v1
+    container_name: payment
+    depends_on:
+      - rabbitmq
+      - cart
+      - user
+
+  frontend:
+    build: ./frontend
+    image: tejahere/frontend:v1
+    container_name: frontend
+    ports:
+      # Expose frontend on port 80
+      - "80:80"
+    depends_on:
+      - catalogue
+      - user
+      - cart
+      - shipping
+      - payment
+
+networks:
+  default:
+    driver: bridge
+    name: roboshop
+
+volumes:
+  mongodb:
+  redis:
+  mysql:
+  rabbitmq:
