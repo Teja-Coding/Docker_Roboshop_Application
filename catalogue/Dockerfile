@@ -13,7 +13,7 @@ WORKDIR /opt/server
 COPY package.json .
 COPY *.js .
 # this may add extra cache memory
-RUN npm install 
+RUN npm install     
 
 
 FROM node:20.19.5-alpine3.21
