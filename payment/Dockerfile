@@ -1,20 +1,3 @@
-# FROM python:3.9
-# EXPOSE 8080
-# WORKDIR /opt/server
-# COPY payment.ini .
-# COPY *.py .
-# COPY requirements.txt .
-# RUN pip3 install -r requirements.txt
-
-# ENV CART_HOST="cart" \
-#     CART_PORT=8080 \
-#     USER_HOST="user" \
-#     USER_PORT=8080 \
-#     AMQP_HOST="rabbitmq" \
-#     AMQP_USER="roboshop" \
-#     AMQP_PASS="roboshop123"
-# CMD [ "uwsgi","--ini","payment.ini" ]
-
 # ===========================
 # Stage 1: Builder (Alpine)
 # ===========================
@@ -29,6 +12,7 @@ RUN apk add --no-cache \
 COPY requirements.txt .
 # Install into /install (just like you did)
 RUN pip3 install --prefix=/install -r requirements.txt
+
 
 # ===========================
 # Stage 2: Runtime (Alpine)
@@ -51,5 +35,23 @@ ENV CART_HOST="cart" \
     AMQP_HOST="rabbitmq" \
     AMQP_USER="roboshop" \
     AMQP_PASS="roboshop123"
+
 USER roboshop
 CMD ["uwsgi", "--ini", "payment.ini"]
+
+
+# FROM python:3.9
+# EXPOSE 8080
+# WORKDIR /opt/server
+# COPY payment.ini .
+# COPY *.py .
+# COPY requirements.txt .
+# RUN pip3 install -r requirements.txt
+# ENV CART_HOST="cart" \
+#     CART_PORT="8080" \
+#     USER_HOST="user" \
+#     USER_PORT="8080" \
+#     AMQP_HOST="rabbitmq" \
+#     AMQP_USER="roboshop" \
+#     AMQP_PASS="roboshop123"
+# CMD ["uwsgi","--ini","payment.ini"]
